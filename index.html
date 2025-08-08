@@ -1,0 +1,276 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horários Escolares - IFRN/JC</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.2.6/pdfobject.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #2c3e50;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: 2.2em;
+            font-weight: 300;
+            color: #34495e;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            font-weight: 400;
+        }
+
+        .main-content {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .tabs {
+            display: flex;
+            background: #ecf0f1;
+            border-bottom: 1px solid #bdc3c7;
+        }
+
+        .tab-button {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 18px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #7f8c8d;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab-button:hover {
+            background: rgba(52, 73, 94, 0.05);
+            color: #34495e;
+        }
+
+        .tab-button.active {
+            color: #3498db;
+            background: #fff;
+        }
+
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3498db, #2980b9);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 25px;
+            min-height: 600px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .pdf-container {
+            width: 100%;
+            height: 70vh;
+            min-height: 500px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            background: #fff;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+
+        .loading::before {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ecf0f1;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 0.85em;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .tab-button {
+                padding: 15px 12px;
+                font-size: 14px;
+            }
+
+            .tab-content {
+                padding: 20px 15px;
+            }
+
+            .pdf-container {
+                height: 60vh;
+                min-height: 400px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab-button {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Horários Escolares</h1>
+            <div class="subtitle">IFRN/JC • 2025.2</div>
+        </header>
+
+        <main class="main-content">
+            <div class="tabs">
+                <button class="tab-button active" onclick="openTab(event, 'turmas')">
+                    Horários das Turmas
+                </button>
+                <button class="tab-button" onclick="openTab(event, 'professores')">
+                    Horários dos Professores
+                </button>
+            </div>
+
+            <div id="turmas" class="tab-content active">
+                <div id="pdf-turmas" class="pdf-container">
+                    <div class="loading">Carregando horários das turmas...</div>
+                </div>
+            </div>
+
+            <div id="professores" class="tab-content">
+                <div id="pdf-professores" class="pdf-container">
+                    <div class="loading">Carregando horários dos professores...</div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>© IFRN/JC - Todos os direitos reservados</p>
+        </footer>
+    </div>
+
+    <script>
+        // Função para alternar entre abas
+        function openTab(evt, tabName) {
+            // Esconde todos os conteúdos das abas
+            const tabContents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove("active");
+            }
+
+            // Remove a classe active de todos os botões
+            const tabButtons = document.getElementsByClassName("tab-button");
+            for (let i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].classList.remove("active");
+            }
+
+            // Mostra o conteúdo da aba selecionada e marca o botão como ativo
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        // Carrega os PDFs quando a página termina de carregar
+        window.addEventListener('load', function() {
+            // Timestamp para forçar atualização dos PDFs
+            const timestamp = new Date().getTime();
+            
+            // URLs dos PDFs
+            const pdfTurmas = `horario_turmas.pdf?v=${timestamp}`;
+            const pdfProfessores = `horario_professores.pdf?v=${timestamp}`;
+
+            // Configurações do PDFObject
+            const options = {
+                pdfOpenParams: { 
+                    view: "FitH",
+                    toolbar: "1",
+                    navpanes: "0"
+                },
+                fallbackLink: "<p>Seu navegador não suporta PDFs. <a href='[url]'>Clique aqui para baixar</a></p>"
+            };
+
+            // Embed dos PDFs
+            PDFObject.embed(pdfTurmas, "#pdf-turmas", options);
+            PDFObject.embed(pdfProfessores, "#pdf-professores", options);
+        });
+    </script>
+</body>
+</html>
